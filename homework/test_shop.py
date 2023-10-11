@@ -17,18 +17,25 @@ class TestProducts:
     Например, текущий класс группирует тесты на класс Product
     """
 
-    def test_product_check_quantity(self, product):
+    @pytest.mark.parametrize("quantity", [999, 1000])
+    def test_product_check_quantity(self, product, quantity):
         # TODO напишите проверки на метод check_quantity
-        pass
+        assert product.check_quantity(quantity)
 
-    def test_product_buy(self, product):
+    def test_product_check_quantity_err(self, product):
+        assert not product.check_quantity(1001)
+
+    @pytest.mark.parametrize("count, actual_quantity", [(0, 1000), (1, 999), (999, 1), (1000, 0)])
+    def test_product_buy(self, product, count, actual_quantity):
         # TODO напишите проверки на метод buy
-        pass
+        product.buy(count)
+        assert product.quantity == actual_quantity
 
     def test_product_buy_more_than_available(self, product):
         # TODO напишите проверки на метод buy,
         #  которые ожидают ошибку ValueError при попытке купить больше, чем есть в наличии
-        pass
+        with pytest.raises(ValueError):
+            product.buy(1001)
 
 
 class TestCart:
