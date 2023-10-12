@@ -16,6 +16,11 @@ def cart():
     return Cart()
 
 
+@pytest.fixture
+def product_2():
+    return Product("bookmark", 23, "This is a bookmark", 320)
+
+
 class TestProducts:
     """
     Тестовый класс - это способ группировки ваших тестов по какой-то тематике
@@ -77,7 +82,15 @@ class TestCart:
         cart.clear()
         assert product not in cart.products.keys()
 
-    @pytest.mark.parametrize("quantity", [0, 1, 999, 1000])
-    def test_cart_get_total_price(self, cart, product, quantity):
-        cart.add_product(product, quantity)
-        assert cart.get_total_price() == product.price * quantity
+    # @pytest.mark.parametrize("quantity", [0, 1, 999, 1000])
+    # def test_cart_get_total_price_one_product(self, cart, product, quantity):
+    #     cart.add_product(product, quantity)
+    #     assert cart.get_total_price() == product.price * quantity
+
+    @pytest.mark.parametrize("quantity_product, quantity_product_2", [(0, 0), (1, 0), (0, 1), (1, 1), (999, 319), (1000, 320)])
+    def test_cart_get_total_price_few_product(self, cart, product, product_2, quantity_product, quantity_product_2):
+        cart.add_product(product, quantity_product)
+        prise_1 = cart.get_total_price()
+        assert prise_1 == product.price * quantity_product
+        cart.add_product(product_2, quantity_product_2)
+        assert prise_1 + cart.get_total_price() == (product.price * quantity_product + product_2.price * quantity_product_2)
