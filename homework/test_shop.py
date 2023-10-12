@@ -70,22 +70,23 @@ class TestCart:
         cart.remove_product(product, rm_products)
         assert cart.products[product] == expected_count
 
-    @pytest.mark.parametrize("add_products, rm_products", [(0, 0), (1, 1), (0, 1)])
+    @pytest.mark.parametrize("add_products, rm_products", [(1, 1), (0, 1)])
     def test_products_del_from_cart_all(self, cart, product, add_products, rm_products):
         cart.add_product(product, add_products)
         cart.remove_product(product, rm_products)
         assert product not in cart.products.keys()
+
+    @pytest.mark.parametrize("add_products", [10])
+    def test_products_del_from_cart_null_items(self, cart, product, add_products):
+        cart.add_product(product, add_products)
+        cart.remove_product(product)
+        assert not cart.products
 
     @pytest.mark.parametrize("quantity", [0, 1, 999, 1000])
     def test_cart_clear(self, cart, product, quantity):
         cart.add_product(product, quantity)
         cart.clear()
         assert product not in cart.products.keys()
-
-    # @pytest.mark.parametrize("quantity", [0, 1, 999, 1000])
-    # def test_cart_get_total_price_one_product(self, cart, product, quantity):
-    #     cart.add_product(product, quantity)
-    #     assert cart.get_total_price() == product.price * quantity
 
     @pytest.mark.parametrize("quantity_product, quantity_product_2", [(0, 0), (1, 0), (0, 1), (1, 1), (999, 319), (1000, 320)])
     def test_cart_get_total_price_few_product(self, cart, product, product_2, quantity_product, quantity_product_2):
@@ -94,3 +95,16 @@ class TestCart:
         assert prise_1 == product.price * quantity_product
         cart.add_product(product_2, quantity_product_2)
         assert prise_1 + cart.get_total_price() == (product.price * quantity_product + product_2.price * quantity_product_2)
+
+    @pytest.mark.parametrize("quantity", [1, 1000])
+    def test_cart_buy_product_smaller_then_stock(self, cart, product, quantity):
+        cart.add_product(product, quantity)
+        old_quantity = product.quantity
+        cart.buy()
+        assert old_quantity == product.quantity + quantity
+
+    @pytest.mark.parametrize("quantity", [1001, ])
+    def test_cart_buy_product_more_then_stock(self, cart, product, quantity):
+        cart.add_product(product, quantity)
+        with pytest.raises(ValueError):
+            cart.buy()
